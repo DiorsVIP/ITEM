@@ -1,0 +1,84 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+Admin_menu	client.cpp	/^void Admin_menu(TCPClient client)$/;"	f
+Data	protocol.h	/^    char       Data[NET_PACKET_DATA_SIZE];     \/\/\/< 数据$/;"	m	struct:NetPacket
+EPOLL_SIZE	server.cpp	32;"	d	file:
+Header	protocol.h	/^    NetPacketHeader     Header;                         \/\/\/< 包头$/;"	m	struct:NetPacket
+LISTEN_SIZE	server.cpp	31;"	d	file:
+LOGIN	protocol.h	/^    LOGIN  = 1,  \/\/登录$/;"	e	enum:eNetOpcode
+LOGIN_NO	protocol.h	/^    LOGIN_NO,    \/\/登录失败$/;"	e	enum:eNetOpcode
+LOGIN_YES	protocol.h	/^    LOGIN_YES,  \/\/登录成功$/;"	e	enum:eNetOpcode
+Login	server.cpp	/^bool Login(TCPServer &server,int conn_fd,char *recv_data)   \/\/登录$/;"	f
+Login_Register	client.cpp	/^void Login_Register(TCPClient client)   \/\/登录注册函数$/;"	f
+MyDB	MyDB.cpp	/^MyDB::MyDB()$/;"	f	class:MyDB
+MyDB	MyDB.h	/^class MyDB$/;"	c
+NET_PACKET_DATA_SIZE	protocol.h	11;"	d
+NetPacket	protocol.h	/^struct NetPacket$/;"	s
+NetPacketHeader	protocol.h	/^struct NetPacketHeader$/;"	s
+PERSONAL_DATA	protocol.h	/^    PERSONAL_DATA  \/\/查询个人信息$/;"	e	enum:eNetOpcode
+PORT	client.cpp	25;"	d	file:
+PORT	server.cpp	30;"	d	file:
+Personal_data	client.cpp	/^void Personal_data(TCPClient client)$/;"	f
+Personal_data	server.cpp	/^bool Personal_data(TCPServer &server,int conn_fd,char *recv_data) $/;"	f
+REGISTER	protocol.h	/^    REGISTER,  \/\/注册$/;"	e	enum:eNetOpcode
+REGISTER_NO	protocol.h	/^    REGISTER_NO,  \/\/注册失败$/;"	e	enum:eNetOpcode
+REGISTER_YES	protocol.h	/^    REGISTER_YES,  \/\/注册成功$/;"	e	enum:eNetOpcode
+Register	server.cpp	/^bool Register(TCPServer &server,int conn_fd,char* recv_data)    \/\/注册$/;"	f
+TCPClient	client.cpp	/^TCPClient::TCPClient(int argc,char **argv)  \/\/构造函数$/;"	f	class:TCPClient
+TCPClient	client.cpp	/^class TCPClient$/;"	c	file:
+TCPServer	server.cpp	/^TCPServer::TCPServer()  \/\/构造函数$/;"	f	class:TCPServer
+TCPServer	server.cpp	/^class TCPServer$/;"	c	file:
+_MYDB_H	MyDB.h	9;"	d
+_PROTOCOL_H	protocol.h	9;"	d
+acceptClient	server.cpp	/^void TCPServer::acceptClient()      \/\/接受客户端连接请求$/;"	f	class:TCPServer
+cli_addr	server.cpp	/^    struct sockaddr_in cli_addr;  \/\/客户端地址$/;"	m	class:TCPServer	typeref:struct:TCPServer::sockaddr_in	file:
+cli_len	server.cpp	/^    socklen_t cli_len;  \/\/记录连接套接字地址的大小$/;"	m	class:TCPServer	file:
+closeClient	server.cpp	/^void TCPServer::closeClient(int conn_fd)     \/\/处理客户端退出$/;"	f	class:TCPServer
+conn_fd	client.cpp	/^    int conn_fd; \/\/创建连接套接字$/;"	m	class:TCPClient	file:
+conn_fd	server.cpp	/^    int conn_fd;    \/\/连接套接字$/;"	m	class:TCPServer	file:
+conn_fd	server.cpp	/^    int conn_fd;$/;"	m	struct:pthread_arg	file:
+data_buffer	client.cpp	/^    char data_buffer[10000];    \/\/存放发送和接收数据的buffer$/;"	m	class:TCPClient	file:
+dealwithpacket	server.cpp	/^bool TCPServer::dealwithpacket(TCPServer &server,int conn_fd, char *recv_data,uint16_t wOpcode,int datasize)  \/\/处理接收到的数据$/;"	f	class:TCPServer
+eNetOpcode	protocol.h	/^enum eNetOpcode$/;"	g
+epollfd	server.cpp	/^    int epollfd;  \/\/epoll监听描述符$/;"	m	class:TCPServer	file:
+event	server.cpp	/^    struct epoll_event  event;   \/\/epoll监听事件$/;"	m	class:TCPServer	typeref:struct:TCPServer::epoll_event	file:
+events	server.cpp	/^    struct epoll_event*  events;  \/\/epoll监听事件结果集合指针$/;"	m	class:TCPServer	typeref:struct:TCPServer::epoll_event	file:
+exeSQL	MyDB.cpp	/^bool MyDB::exeSQL(string sql)$/;"	f	class:MyDB
+head	server.cpp	/^list<information>  head;$/;"	v
+information	server.cpp	/^    information(char *p,int fd)$/;"	f	class:information
+information	server.cpp	/^class information$/;"	c	file:
+initDB	MyDB.cpp	/^bool MyDB::initDB(string host,string user,string passwd,string db_name)$/;"	f	class:MyDB
+inputpasswd	client.cpp	/^bool inputpasswd(string &passwd)   \/\/无回显输入密码$/;"	f
+lnumber	server.cpp	/^    char lnumber[20];   \/\/账号$/;"	m	class:information	file:
+lsocket	server.cpp	/^    int lsocket;         \/\/套接字$/;"	m	class:information	file:
+main	client.cpp	/^int main(int argc ,char **argv)$/;"	f
+main	server.cpp	/^int main()$/;"	f
+menu	client.cpp	/^void menu(TCPClient client) $/;"	f
+mutex	server.cpp	/^pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;   \/\/创建并初始化一个线程互斥锁$/;"	v
+my_err	protocol.h	/^void my_err(const char *err_string,int line)  \/\/自定义错误函数$/;"	f
+mysql	MyDB.h	/^    MYSQL *mysql;          \/\/连接mysql句柄指针$/;"	m	class:MyDB
+pthread_arg	server.cpp	/^pthread_arg::pthread_arg(TCPServer &server1):server(server1),conn_fd(0){}   \/\/线程参数类构造函数$/;"	f	class:pthread_arg
+pthread_arg	server.cpp	/^struct pthread_arg$/;"	s	file:
+recv_from_serv	client.cpp	/^bool TCPClient::recv_from_serv()   \/\/从服务器接收数据$/;"	f	class:TCPClient
+reset_oneshot	server.cpp	/^void reset_oneshot( int epollfd, int fd )$/;"	f
+result	MyDB.h	/^    MYSQL_RES *result;$/;"	m	class:MyDB
+row	MyDB.h	/^    MYSQL_ROW row; $/;"	m	class:MyDB
+run	client.cpp	/^void TCPClient::run(TCPClient& client)$/;"	f	class:TCPClient
+run	server.cpp	/^void TCPServer::run(TCPServer &server)  \/\/主执行函数$/;"	f	class:TCPServer
+send_to_serv	client.cpp	/^bool TCPClient::send_to_serv(int datasize,uint16_t wOpcode) \/\/向服务器发送数据$/;"	f	class:TCPClient
+serv_addr	client.cpp	/^    struct sockaddr_in serv_addr; \/\/储存服务器地址$/;"	m	class:TCPClient	typeref:struct:TCPClient::sockaddr_in	file:
+serv_addr	server.cpp	/^    struct sockaddr_in serv_addr;   \/\/服务器地址$/;"	m	class:TCPServer	typeref:struct:TCPServer::sockaddr_in	file:
+server	server.cpp	/^    TCPServer &server;$/;"	m	struct:pthread_arg	file:
+server_recv	server.cpp	/^bool TCPServer::server_recv(TCPServer &server,int conn_fd)  \/\/接收数据函数$/;"	f	class:TCPServer
+server_send	server.cpp	/^bool TCPServer::server_send(int conn_fd, char send_buf[10000],int datasize,uint16_t wOpcode) \/\/发送数据$/;"	f	class:TCPServer
+sock_fd	server.cpp	/^    int sock_fd;  \/\/监听套接字$/;"	m	class:TCPServer	file:
+threadFunc	server.cpp	/^void* threadFunc(void *arg)   \/\/线程处理函数$/;"	f
+wDataSize	protocol.h	/^    unsigned short      wDataSize;  \/\/\/< 数据包大小，包含封包头和封包数据大小$/;"	m	struct:NetPacketHeader
+wOpcode	protocol.h	/^    unsigned short      wOpcode;    \/\/\/< 操作码$/;"	m	struct:NetPacketHeader
+~MyDB	MyDB.cpp	/^MyDB::~MyDB()$/;"	f	class:MyDB
+~TCPClient	client.cpp	/^TCPClient::~TCPClient()  \/\/析构函数$/;"	f	class:TCPClient
+~TCPServer	server.cpp	/^TCPServer::~TCPServer()   \/\/析构函数$/;"	f	class:TCPServer

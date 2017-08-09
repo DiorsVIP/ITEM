@@ -12,6 +12,7 @@
 #include<sys/types.h>
 #include<sys/wait.h>
 #include<sys/stat.h>
+#include<stdlib.h>
 #include<fcntl.h>
 #include<netinet/in.h>
 #include<arpa/inet.h>
@@ -192,9 +193,10 @@ bool TCPClient::recv_from_serv()   //从服务器接收数据
 bool inputpasswd(string &passwd);   //无回显输入密码
 void Login_Register(TCPClient client);    //登录注册函数
 void menu(TCPClient client);  //用户菜单函数
-void Admin_menu(TCPClient client); //管理员菜单函数
+void Admin_menu(TCPClient &client); //管理员菜单函数
 
 
+void inquire_books(TCPClient client);
 bool inputpasswd(string &passwd)   //无回显输入密码
 {
     struct termios tm,tm_old;
@@ -347,6 +349,10 @@ void Login_Register(TCPClient client)   //登录注册函数
             cout<<"Bye"<<endl;
             exit(0);
         }
+        else if(choice=="4")
+        {
+            inquire_books(client);
+        }
         else
         {
             cout<<"输入格式错误，请重新输入"<<endl;
@@ -395,27 +401,68 @@ void Personal_data(TCPClient client)
     getchar(); 
     menu(client);
 }
-
-void Admin_menu(TCPClient client)
+bool add_books_info(TCPClient &client)
 {
-    int choice;
-    
-    cout<<"\t\t欢迎进入管理员功能界面:"<<endl;
-    cout<<"\t\t\t1.上线书籍"<<endl;
-    cout<<"\t\t\t2.下线书籍"<<endl;
-    cout<<"\t\t\t3.退出"<<endl;
-    cout<<"\n请输入选择序号:";
+    bool non_stop = true;
+    string yes_or_no;
+    Json::Value book;
+    string ISBN,book_name,publish_house,author,count,stat;
 
-    while (1) {
-        cin >> choice;
-
-        switch (choice)
-        {
-            case 1:                        break;
-            case 2:                        break;
-            case 3: cout<<"Bye"<<endl;     exit(0);
+    while(non_stop){
+        cout << endl;
+        cout << endl;
+        cout << "是否开始本次录入[yes/no]:";
+        cin >> yes_or_no;
+        if(yes_or_no != "yes"){
+            cout << "您输入的选项不是yes,已经退出上线图书功能" << endl;
+            non_stop = false;
+            continue;
         }
+        cout << "请输入图书ISBN:";
+        cin >> ISBN;
+        cout << "请输入图书名称:";
+        cin >> book_name;
+        cout << "请输入图书出版社:";
+        cin >> publish_house;
+        cout << "请输入图书作者:";
+        cin >> author;
+        cout << "请输入图书数量:";
+        cin >> count;
+        do{
+            cout << "请输入图书是否可借阅[yes/no]:";
+            cin >> stat;
+        }while((stat != "yes")&& (stat != "no"));
+        
+        book["ISBN"] = ISBN.c_str();
+        book["book_name"] = book_name.c_str();
+        book["publish_house"] = publish_house.c_str();
+        book["author"] = author.c_str();
+        book["count"] = count.c_str();
+        book["stat"] = stat.c_str();
+
+        string out = book.toStyledString();
+        memcpy(client.data_buffer,out.c_str(),out.size());
+        if(client.send_to_serv(out.size(),ADD_BOOKS_INFO) == false){
+            cout << "发送数据失败!" << endl;
+            return false;
+        }
+        if(client.recv_from_serv() == false){
+             cout << "接收数据失败"<<endl;
+             return false;
+        }else{
+            //cout << "所接受的数据是:";
+            //cout << client.data_buffer << endl;
+            NetPacketHeader *phead = (NetPacketHeader*)client.data_buffer;
+            if(phead -> wOpcode == ADD_BOOKS_INFO_YES){
+                cout << "书籍添加成功" << endl;
+            }else{
+                cout << "书籍添加失败,原因可能是书籍在数据库中已存在" << endl;
+                continue;
+            }
+        }
+        cout << endl;
     }
+    return true;
 }
 void inquire_books(TCPClient client)
 {
@@ -449,14 +496,42 @@ void inquire_books(TCPClient client)
         cout << "书名：" << accounts["book_name"].asString()<< endl;
         cout << "作者：" << accounts["author"].asString()<< endl;
         cout << "出版社：" << accounts["publish_house"].asString()<< endl;
-        cout << "数量：" << accounts["address"].asString()<< endl;
-        cout << "状态：" << accounts["birthdate"].asString()<< endl;
+        cout << "数量：" << accounts["count"].asString()<< endl;
+        cout << "状态：" << accounts["stat"].asString()<< endl;
     }
     cout << "按任意键返回菜单\n" << endl;
     getchar(); 
     getchar(); 
     menu(client);
 }
+bool del_books_info(TCPClient &client){}
+bool chan_books_info(TCPClient &client){}
+void Admin_menu(TCPClient &client)
+{
+    int choice;
+    
+    while (1) {
+        system("clear");
+        cout << "\t\t欢迎进入管理员功能界面"<<endl;
+        cout << "\t\t1.上线图书"<< endl;
+        cout << "\t\t2.下线图书"<<endl;
+        cout << "\t\t3.更改图书"<< endl;
+        cout << "\t\t4.退出" << endl;
+        cin >> choice;
+
+        switch (choice)
+        {
+            case 1:add_books_info(client); break;
+            case 2:del_books_info(client); break;
+            case 3:chan_books_info(client);break;
+            case 4: cout<<"Bye"<<endl;     exit(0);
+        }
+        cout << "按任意见继续..."<< endl;
+        getchar();
+        getchar();
+    }
+}
+
 void menu(TCPClient client) 
 {
     int choice;
@@ -464,10 +539,7 @@ void menu(TCPClient client)
     cout<<"\t\t欢迎进入功能界面:"<<endl;
     cout<<"\t\t\t1.查询个人资料"<<endl;
     cout<<"\t\t\t2.聊天"<<endl;
-    cout<<"\t\t\t3.查询书籍信息"<<endl;
-    cout<<"\t\t\t4.借阅图书"<<endl;
-    cout<<"\t\t\t5.归还图书"<<endl;
-    cout<<"\t\t\t6.退出"<<endl;
+    cout<<"\t\t\t3.退出"<<endl;
     cout<<"\n请输入选择序号:";
 
     while (1) {
@@ -476,11 +548,8 @@ void menu(TCPClient client)
         switch (choice)
         {
             case 1: Personal_data(client); break;
-            case 2:                        break;
-            case 3:                        break;
-            case 4:                        break;
-            case 5:                        break;
-            case 6: cout<<"Bye"<<endl;     exit(0);
+            case 2: inquire_books(client);          break;
+            case 3: cout<<"Bye"<<endl;     exit(0);
         }
     }
 }

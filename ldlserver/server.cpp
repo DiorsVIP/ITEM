@@ -19,7 +19,7 @@
 #include<sys/epoll.h>
 #include<errno.h>
 #include<list>
-#include <vector>
+
 #include <json/json.h>
 #include"MyDB.h"
 #include"protocol.h"
@@ -189,6 +189,7 @@ void reset_oneshot(int epollfd,int fd);   //重置conn_fd上的EPOLLONESHOT事�
 void* threadFunc(void *arg);  //线程处理函数
 bool Personal_data(TCPServer &server,int conn_fd,char *recv_data); 
 
+bool inquire_books(TCPServer &server,int conn_fd,char *recv_data); 
 
 //重置fd上的EPOLLONESHOT事件
 void reset_oneshot( int epollfd, int fd )
@@ -214,7 +215,7 @@ bool Login(TCPServer &server,int conn_fd,char *recv_data)   //登录
 
     MyDB db;
     int flags=LOGIN_NO;
-    if(db.initDB("localhost","root","yycwsndns","book_borrow_sys")==false)  //连接数据库
+    if(db.initDB("localhost","root","13700744486","book_borrow_sys")==false)  //连接数据库
     {
         cout<<"连接数据库失败"<<endl;
         return false;
@@ -278,7 +279,7 @@ bool Register(TCPServer &server,int conn_fd,char* recv_data)    //注册
 
     MyDB db;
     int flags=REGISTER_NO;
-    if(db.initDB("localhost","root","yycwsndns","book_borrow_sys")==false)  //连接数据库
+    if(db.initDB("localhost","root","13700744486","book_borrow_sys")==false)  //连接数据库
     {
         cout<<"连接数据库失败"<<endl;
         return false;
@@ -328,7 +329,7 @@ bool Personal_data(TCPServer &server,int conn_fd,char *recv_data)
     Json::Value accounts;
 
     MyDB db;
-    if(db.initDB("localhost","root","yycwsndns","book_borrow_sys")==false)  //连接数据库
+    if(db.initDB("localhost","root","13700744486","book_borrow_sys")==false)  //连接数据库
     {
         cout<<"连接数据库失败"<<endl;
         return false;
@@ -378,52 +379,6 @@ bool Personal_data(TCPServer &server,int conn_fd,char *recv_data)
 
     return true;
 }
-bool inquire_books(TCPServer &server,int conn_fd,char *recv_data) 
-{
-    Json::Value book;
-    Json::Reader reader;
-    char buf[10000];
-    string out;
-    int flag = 1;//判断服务器是否出错的标志
-    if(reader.parse(str,book) < 0)
-    {
-        cout << "json解析失败" << endl;
-        flag = 0;
-    }
-    MyDB db;
-    if(db.initDB("localhost","root","548946","book_borrow_sys")==false)  //连接数据库
-    {
-        cout<<"连接数据库失败"<<endl;
-        return false;
-    }
-
-    string sentence = "select ISBN,book_name,publish_house,author,count,stat from book_infor;";
-
-    if(db.exeSQL(sentence)==false)
-    {
-        cout<<"执行sql语句失败"<<endl;
-    }
-    if(db.result)  //结果集中有数据
-    {
-        db.row=mysql_fetch_row(db.result);
-        book["ISBN"] = db.row[0];
-        book["book_name"] = db.row[1];
-        book["publish_house"] = db.row[2];
-        book["author"] = db.row[3];
-        book["count"] = db.row[4];
-        book["stat"] = db.row[5];
-        out  = book.toStyledString();
-       
-        memcpy(buf,out.c_str(),out.size());
-    }
-    if(server.server_send(conn_fd,buf,out.size(),PERSONAL_DATA)==false)
-    {
-        cout<<"向客户端发送发送数据失败"<<endl;
-        return false;
-    }
-    return true;
-
-}
 
 void* threadFunc(void *arg)   //线程处理函数
 {
@@ -446,7 +401,56 @@ void* threadFunc(void *arg)   //线程处理函数
     pthread_exit(NULL);
 
 } 
+bool add_books_info(TCPServer &server,int conn_fd,char *recv_data)
+{
+    Json::Value book;
+    Json::Reader reader;
+    int flag = 1;
+    string str(recv_data);
+    if(reader.parse(str,book) < 0)
+    {
+        cout << "json解析失败" << endl;
+        return false;
+    }
 
+    MyDB db;
+    if(db.initDB("localhost","root","13700744486","book_borrow_sys") == false){
+        cout << "连接数据库失败" << endl;
+        flag = 0;
+    }
+   string sentence = "select ISBN from book_infor where ISBN = \"" +  book["ISBN"].asString() + "\";";
+    if(db.exeSQL(sentence) == false){
+        cout << "执行sql语句失败" << endl;
+        flag = 0;
+    }
+    if(db.result && mysql_num_rows(db.result) == 0){
+        //表示这个书以前没有
+        sentence.clear();
+        sentence = "insert book_infor(ISBN,book_name,publish_house,author,count,stat) value(\"" + book["ISBN"].asString()+ "\","+"\"" + book["book_name"].asString()+"\","+"\"" + book["publish_house"].asString()+"\"," + "\""+book["author"].asString()+"\"," + "\"" + book["count"].asString() + "\"," + "\""+book["stat"].asString() + "\"" + ");";
+    }else{
+        //这本书本来就存在
+        if(server.server_send(conn_fd,NULL,0,ADD_BOOKS_INFO_NO) == false){
+            cout << "告知客户端这本书已经存在时,发送信息失败!" << endl;
+        }
+        flag = 0;
+    }
+    if(db.exeSQL(sentence) == false){
+        cout << "执行sql语句失败" << endl;
+        flag = 0;
+    }
+    if(server.server_send(conn_fd,NULL,0,ADD_BOOKS_INFO_YES) == false){
+        cout << "告知客户端新书籍信息写入数据库成功时,发送信息失败!" << endl;
+    }
+    
+    if(flag == 0){
+        if(server.server_send(conn_fd,NULL,0,ADD_BOOKS_INFO_NO) == false){
+            cout << "告知服务器出错时,发送数据失败"<<endl;
+        }
+        return false;
+    }
+    return true;
+
+}
 
 bool TCPServer::dealwithpacket(TCPServer &server,int conn_fd, char *recv_data,uint16_t wOpcode,int datasize)  //处理接收到的数据
 {
@@ -475,17 +479,65 @@ bool TCPServer::dealwithpacket(TCPServer &server,int conn_fd, char *recv_data,ui
             return false;
         }
     }
-    else if(wOpcode==SEA_BOOK) //查询书籍信息
+    else if(wOpcode == ADD_BOOKS_INFO)//添加图书
     {
-        if(inquire_books(server,conn_fd,recv_data)==false) 
+        if(add_books_info(server,conn_fd,recv_data) == false)
         {
-            cout << "查询信息失败"<<endl;
+            cout << "上线图书失败" << endl;
             return false;
         }
-        
     }
 
+    else if(wOpcode == SEA_BOOK)//添加图书
+    {
+        if(inquire_books(server,conn_fd,recv_data) == false)
+        {
+            cout << "查询失败" << endl;
+            return false;
+        }
+    }
 
+    return true;
+
+}
+
+bool inquire_books(TCPServer &server,int conn_fd,char *recv_data) 
+{
+    Json::Value book;
+    Json::Reader reader;
+    char buf[10000];
+    string out;
+    MyDB db;
+    if(db.initDB("localhost","root","13700744486","book_borrow_sys")==false)  //连接数据库
+    {
+        cout<<"连接数据库失败"<<endl;
+        return false;
+    }
+
+    string sentence = "select ISBN,book_name,publish_house,author,count,stat from book_infor where ISBN = '6';";
+
+    if(db.exeSQL(sentence)==false)
+    {
+        cout<<"执行sql语句失败"<<endl;
+    }
+    if(db.result)  //结果集中有数据
+    {
+        db.row=mysql_fetch_row(db.result);
+        book["ISBN"] = db.row[0];
+        book["book_name"] = db.row[1];
+        book["publish_house"] = db.row[2];
+        book["author"] = db.row[3];
+        book["count"] = db.row[4];
+        book["stat"] = db.row[5];
+        out  = book.toStyledString();
+       
+        memcpy(buf,out.c_str(),out.size());
+    }
+    if(server.server_send(conn_fd,buf,out.size(),SEA_BOOK)==false)
+    {
+        cout<<"向客户端发送发送数据失败"<<endl;
+        return false;
+    }
     return true;
 
 }
